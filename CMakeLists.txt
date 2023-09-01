@@ -34,9 +34,7 @@ add_executable(${PROJECT_NAME} main.cpp
         Game.cpp
         Game.h
         Utils.h
-        Snake.cpp
         Snake.h
-        Fruit.cpp
         Fruit.h
         Title.h)
 

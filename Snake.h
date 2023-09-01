@@ -11,6 +11,23 @@
 namespace snake {
 
 struct Snake {
+  enum class Direction {
+    Horizontal,
+    Vertical
+  };
+
+  Direction direction{ Direction::Horizontal };
+
+  void setSpeed(raylib::Vector2 speed) {
+    if (speed.x == 0) {
+      direction = Direction::Vertical;
+    } else if (speed.y == 0) {
+      direction = Direction::Horizontal;
+    }
+
+    segments[0].speed = speed;
+  };
+
   struct Segment : public Title {
     Vector2 speed   { config::titleSize, 0.0f };
     Vector2 position{ 0.0f, 0.0f };
@@ -18,9 +35,11 @@ struct Snake {
 
   std::vector<Segment> segments{ 256 };
 
-  void Draw() {
+  void Draw(raylib::Vector2 padding) {
     for (int i = 0; i < length; ++i) {
-      DrawRectangleV(segments[i].position, segments[i].size, i == 0 ? headColor : color);
+      raylib::Vector2 normal = { segments[i].position.x + padding.x, segments[i].position.y + padding.y };
+
+      normal.DrawRectangle(segments[i].size, i == 0 ? headColor : color);
     }
   }
 

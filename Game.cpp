@@ -1,40 +1,58 @@
 #include "Game.h"
 
+void snake::Game::DrawTextCenter(const std::string& text, int fontSize) const {
+  auto textWidth = raylib::MeasureText(text, fontSize);
+
+  raylib::DrawText(text, (window_.GetWidth()  - textWidth) / 2,
+                   window_.GetHeight() / 2 - fontSize, fontSize, raylib::Color::Gray());
+}
+
+void snake::Game::DrawGrid() const {
+  raylib::Color lineColor(raylib::Color::LightGray());
+
+  // Draw vertical line
+  for (int i = 0, titleX = window_.GetWidth() / config::titleSize; i <= titleX; ++i)
+  {
+    float x = config::squareSize * i + padding.x;
+    lineColor.DrawLine(raylib::Vector2{ x, padding.y  },
+                       raylib::Vector2{ x, window_.GetHeight() - padding.y });
+  }
+
+  // Draw vertical line
+  for (int i = 0, titlesY = window_.GetHeight() / config::titleSize; i <= titlesY; ++i)
+  {
+    float y = config::squareSize * i + padding.y;
+    lineColor.DrawLine(raylib::Vector2{ padding.x, y },
+                       raylib::Vector2{ window_.GetWidth() - padding.x, y });
+  }
+}
+
 snake::Game::Game()
-    : window_(config::screenWidth, config::screenHeight, "Snake")
 {
   SetTargetFPS(60);
+  Init();
 }
 
 void snake::Game::Draw() {
-  BeginDrawing();
-  ClearBackground(RColor::White());
+  window_.BeginDrawing();
+
+  window_.ClearBackground(raylib::Color::White());
 
   if (gameOver_)
   {
-    DrawText("PRESS [ENTER] TO PLAY AGAIN", GetScreenWidth()/2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20)/2, GetScreenHeight()/2 - 50, 20, GRAY);
+    DrawTextCenter("PRESS [ENTER] TO PLAY AGAIN");
   }
 
-  // Draw grid lines
-  for (int i = 0; i < config::screenWidth / config::squareSize + 1; i++)
-  {
-    DrawLineV((Vector2){config::squareSize * i + offset.x/2, offset.y/2}, (Vector2){config::squareSize*i + offset.x/2, config::screenHeight - offset.y/2}, LIGHTGRAY);
+  DrawGrid();
+
+  snake_.Draw(padding);
+  fruit_.Draw(padding);
+
+  if (pause_) {
+    DrawTextCenter("GAME PAUSED", 40);
   }
 
-  for (int i = 0; i < config::screenHeight / config::squareSize  + 1; i++)
-  {
-    DrawLineV((Vector2){offset.x/2, config::squareSize * i + offset.y/2}, (Vector2){config::screenWidth - offset.x/2, config::squareSize*i + offset.y/2}, LIGHTGRAY);
-  }
-
-  snake_.Draw();
-
-  // Draw fruit to pick
-  DrawRectangleV(fruit_.position, fruit_.size, fruit_.color);
-
-  if (pause_)
-    DrawText("GAME PAUSED", config::screenWidth / 2 - MeasureText("GAME PAUSED", 40)/2, config::screenHeight / 2 - 40, 40, GRAY);
-
-  EndDrawing();
+  window_.EndDrawing();
 }
 
 void snake::Game::Run() noexcept {
@@ -46,17 +64,17 @@ void snake::Game::Run() noexcept {
 }
 
 void snake::Game::Init() {
-  offset.x = config::screenWidth  % config::squareSize;
-  offset.y = config::screenHeight % config::squareSize;
+  padding.x = (window_.GetWidth()  % config::squareSize) / 2.0f;
+  padding.y = (window_.GetHeight() % config::squareSize) / 2.0f;
+
+  fruit_.Init();
+
+  pause_      = false;
+  gameOver_   = false;
+  fruitActive = false;
+  allowMove   = false;
 
   snake_ = Snake{};
-  fruit_ = Fruit{};
-
-  pause_ = false;
-  gameOver_ = false;
-  fruitActive = false;
-  allowMove = false;
-
   for (int i = 0; i < snake_.length; i++)
   {
     snakePosition[i] = (Vector2){ 0.0f, 0.0f };
@@ -70,7 +88,6 @@ void snake::Game::Update() {
 
     if (!pause_)
     {
-      // Player control
       if (IsKeyPressed(KEY_RIGHT) && (snake_.segments[0].speed.x == 0) && allowMove)
       {
         snake_.segments[0].speed = (Vector2){ config::titleSize, 0 };
@@ -110,8 +127,8 @@ void snake::Game::Update() {
       }
 
       // Wall behaviour
-      if (((snake_.segments[0].position.x) > (config::screenWidth - offset.x)) ||
-          ((snake_.segments[0].position.y) > (config::screenHeight - offset.y)) ||
+      if (((snake_.segments[0].position.x) > (config::screenWidth - padding.x)) ||
+          ((snake_.segments[0].position.y) > (config::screenHeight - padding.y)) ||
           (snake_.segments[0].position.x < 0) || (snake_.segments[0].position.y < 0))
       {
         gameOver_ = true;
@@ -127,13 +144,13 @@ void snake::Game::Update() {
       if (!fruitActive)
       {
         fruitActive = true;
-        fruit_.position = (Vector2){ GetRandomValue(0, (config::screenWidth/config::titleSize) - 1)*config::titleSize + offset.x/2, GetRandomValue(0, (config::screenHeight/config::titleSize) - 1)*config::titleSize + offset.y/2 };
+        fruit_.position = (Vector2){GetRandomValue(0, (config::screenWidth/config::titleSize) - 1)*config::titleSize + padding.x/2, GetRandomValue(0, (config::screenHeight/config::titleSize) - 1)*config::titleSize + padding.y/2 };
 
         for (int i = 0; i < snake_.length; i++)
         {
           while ((fruit_.position.x == snake_.segments[i].position.x) && (fruit_.position.y == snake_.segments[i].position.y))
           {
-            fruit_.position = (Vector2){ GetRandomValue(0, (config::screenWidth/config::titleSize) - 1)*config::titleSize + offset.x/2, GetRandomValue(0, (config::screenHeight/config::titleSize) - 1)*config::titleSize + offset.y/2 };
+            fruit_.position = (Vector2){GetRandomValue(0, (config::screenWidth/config::titleSize) - 1)*config::titleSize + padding.x/2, GetRandomValue(0, (config::screenHeight/config::titleSize) - 1)*config::titleSize + padding.y/2 };
             i = 0;
           }
         }

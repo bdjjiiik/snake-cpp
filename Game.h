@@ -24,25 +24,28 @@ class Game : public Singleton<Game> {
   void Init();
   void Update();
 
+  void DrawTextCenter(const std::string& text, int fontSize = 20) const;
+  void DrawGrid() const;
+
  public:
   Game();
 
   void Run() noexcept;
 
  private:
-  raylib::Window window_;
+  raylib::Window window_{ config::screenWidth, config::screenHeight, "Snake" };
 
   Snake snake_;
   Fruit fruit_;
 
-  RVector2 offset;
+  RVector2 padding;
 
   std::vector<Vector2> snakePosition{ snake_.segments.size() };
 
   bool pause_     { false };
   bool gameOver_  { false };
   bool fruitActive{ false };
-  bool allowMove = false;
+  bool allowMove  { false };
 
   int framesCounter = 0;
 };
