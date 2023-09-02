@@ -1,32 +1,21 @@
 #pragma once
 
-#include "raylib-cpp.hpp"
+#include <vector>
 
-#include "Drawable.h"
-#include "Fruit.h"
-#include "Snake.h"
+#include "Render.h"
 #include "Utils.h"
+#include "GraphicRender.h"
+
+#include "src/objects/GameObject.h"
 
 namespace snake {
-
-namespace config {
-
-// Defines the width of the screen
-constexpr int screenWidth = 800;
-// Defines the height of the screen
-constexpr int screenHeight = 470;
-
-constexpr int squareSize = 30;
-} // end namespace config
 
 class Game : public Singleton<Game> {
  private:
   void Draw();
   void Init();
-  void Update();
 
-  void DrawTextCenter(const std::string& text, int fontSize = 20) const;
-  void DrawGrid() const;
+  //void Update();
 
  public:
   Game();
@@ -34,15 +23,12 @@ class Game : public Singleton<Game> {
   void Run() noexcept;
 
  private:
-  raylib::Window window_;
-  Drawable drawable_;
+  std::shared_ptr<Renderer> renderer_{
+    std::make_shared<GraphicRenderer>()
+  };
 
-  Snake snake_;
-  Fruit fruit_;
-
-  RVector2 padding;
-
-  std::vector<Vector2> snakePosition{ snake_.segments.size() };
+  using Objects = std::vector<std::unique_ptr<GameObject>>;
+  Objects objects_;
 
   bool pause_     { false };
   bool gameOver_  { false };
