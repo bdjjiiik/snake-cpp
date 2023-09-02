@@ -36,6 +36,10 @@ add_executable(${PROJECT_NAME} main.cpp
         Utils.h
         Snake.h
         Fruit.h
-        Title.h)
+        Title.h
+        Drawable.cpp
+        Drawable.h
+        Collision.cpp
+        Collision.h)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib raylib_cpp)

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "raylib-cpp.hpp"
-
 #include <vector>
+#include <deque>
+
 #include "Color.hpp"
 #include "Vector2.hpp"
 
@@ -11,42 +11,51 @@
 namespace snake {
 
 struct Snake {
-  enum class Direction {
-    Horizontal,
-    Vertical
-  };
-
-  Direction direction{ Direction::Horizontal };
-
-  void setSpeed(raylib::Vector2 speed) {
-    if (speed.x == 0) {
-      direction = Direction::Vertical;
-    } else if (speed.y == 0) {
-      direction = Direction::Horizontal;
-    }
-
-    segments[0].speed = speed;
-  };
-
   struct Segment : public Title {
-    Vector2 speed   { config::titleSize, 0.0f };
-    Vector2 position{ 0.0f, 0.0f };
+    raylib::Vector2 position { 0.0f, 0.0f };
+    raylib::Color   color { RColor::Blue() };
   };
 
-  std::vector<Segment> segments{ 256 };
+  void Init() {
+    segments.clear();
+    speed = (Vector2){ config::titleSize, 0 };
+
+    // Add head
+    segments.push_front(Segment{ });
+  }
+
+  void Update() {
+    auto& head = segments.front();
+
+    Segment newHead = head;
+
+    newHead.position.x += speed.x;
+    newHead.position.y += speed.y;
+
+    segments.push_front(newHead);
+
+    segments.pop_back();
+  }
 
   void Draw(raylib::Vector2 padding) {
-    for (int i = 0; i < length; ++i) {
-      raylib::Vector2 normal = { segments[i].position.x + padding.x, segments[i].position.y + padding.y };
+    for (int i = 0; i < segments.size(); ++i) {
+      raylib::Vector2 normal
+        = { segments[i].position.x + padding.x, segments[i].position.y + padding.y };
 
-      normal.DrawRectangle(segments[i].size, i == 0 ? headColor : color);
+      normal.DrawRectangle(segments[i].size, segments[i].color);
     }
   }
 
-  int length{ 1 };
+  int Length() const {
+    return segments.size();
+  }
 
-  RColor color     { RColor::Blue() };
-  RColor headColor { RColor::DarkBlue() };
+  Segment Head() const {
+    return segments.front();
+  }
+
+  std::deque<Segment> segments;
+  raylib::Vector2 speed { config::titleSize, 0.0f };
 };
 
 } // snake

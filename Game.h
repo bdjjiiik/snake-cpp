@@ -2,6 +2,7 @@
 
 #include "raylib-cpp.hpp"
 
+#include "Drawable.h"
 #include "Fruit.h"
 #include "Snake.h"
 #include "Utils.h"
@@ -13,7 +14,7 @@ namespace config {
 // Defines the width of the screen
 constexpr int screenWidth = 800;
 // Defines the height of the screen
-constexpr int screenHeight = 450;
+constexpr int screenHeight = 470;
 
 constexpr int squareSize = 30;
 } // end namespace config
@@ -33,7 +34,8 @@ class Game : public Singleton<Game> {
   void Run() noexcept;
 
  private:
-  raylib::Window window_{ config::screenWidth, config::screenHeight, "Snake" };
+  raylib::Window window_;
+  Drawable drawable_;
 
   Snake snake_;
   Fruit fruit_;
